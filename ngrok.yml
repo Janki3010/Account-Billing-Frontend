@@ -1,0 +1,8 @@
+authtoken: 2unUqXvFQlWr4EELqcXERNv4E2m_2krPB7qnkvfAHo5JRrGRa
+tunnels:
+  first:
+    addr: 8005
+    proto: http    
+  second:
+    addr: 5173
+    proto: http
