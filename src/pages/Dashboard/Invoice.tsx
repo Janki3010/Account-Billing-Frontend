@@ -13,7 +13,6 @@ import type { Party } from "../../types/party";
 import type { ShopProfile } from "../../types/shop_profile";
 import type { ItemResponse } from "../../types/item";
 import {
-  FaTrash,
   FaPlus,
   FaTimes,
   FaFilePdf,
@@ -196,7 +195,7 @@ const InvoiceDashboard = () => {
                 >
                   <option value="">Select Item</option>
                   {items.map((i) => (
-                    <option key={i.item_id} value={i.item_id}>
+                    <option key={i.id} value={i.id}>
                       {i.name}
                     </option>
                   ))}

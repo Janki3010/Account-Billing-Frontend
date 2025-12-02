@@ -34,7 +34,8 @@ const ItemPage = () => {
   };
 
   const handleEdit = (item: ItemResponse) => {
-    const key = item.id || item.item_id;
+    const key = item.id ?? item.item_id ?? "";
+    if (!key) return;
     setEditingItem({ [key]: { ...item } });
   };
 
@@ -49,13 +50,34 @@ const ItemPage = () => {
   const handleFieldChange = (id: string, field: keyof ItemRequest, value: string) => {
     setEditingItem((prev) => ({
       ...prev,
-      [id]: { ...prev[id], [field]: value },
+      [id]: {
+        ...prev[id],
+        [field]: ["purchase_price", "sale_price", "stock_quantity", "gst_rate"].includes(field)
+          ? Number(value)
+          : value,
+      },
     }));
   };
 
   const handleSave = async (id: string) => {
     const updatedData = editingItem[id];
-    await updateItem({ ...updatedData, id });
+    if (!updatedData) return;
+
+    const payload: ItemRequest & { id: string } = {
+      id,
+      name: updatedData.name || "",
+      description: updatedData.description || "",
+      hsn_code: updatedData.hsn_code || "",
+      IMEI_number: updatedData.IMEI_number || "",
+      unit: updatedData.unit || "",
+      purchase_price: updatedData.purchase_price ?? 0,
+      sale_price: updatedData.sale_price ?? 0,
+      stock_quantity: updatedData.stock_quantity ?? 0,
+      gst_rate: updatedData.gst_rate ?? 0,
+      company_id: updatedData.company_id || "",
+    };
+
+    await updateItem(payload);
     handleCancelEdit(id);
     loadData();
   };
@@ -68,7 +90,12 @@ const ItemPage = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: ["purchase_price", "sale_price", "stock_quantity", "gst_rate"].includes(name)
+        ? Number(value)
+        : value,
+    }));
   };
 
   const handleCreateItem = async () => {
@@ -79,10 +106,10 @@ const ItemPage = () => {
       hsn_code: "",
       IMEI_number: "",
       unit: "",
-      purchase_price: "",
-      sale_price: "",
-      stock_quantity: "",
-      gst_rate: "",
+      purchase_price: 0,
+      sale_price: 0,
+      stock_quantity: 0,
+      gst_rate: 0,
       company_id: "",
     });
     setShowCreateModal(false);
@@ -139,7 +166,9 @@ const ItemPage = () => {
                 </thead>
                 <tbody>
                   {companyItems.map((item) => {
-                    const id = item.id || item.item_id;
+                    const id = item.id ?? item.item_id ?? "";
+                    if (!id) return null;
+
                     const isEditing = !!editingItem[id];
                     const currentData = editingItem[id] || item;
 
@@ -163,7 +192,7 @@ const ItemPage = () => {
                         <td className="p-3">
                           {isEditing ? (
                             <input
-                              value={currentData.sale_price || ""}
+                              value={currentData.sale_price ?? 0}
                               onChange={(e) => handleFieldChange(id, "sale_price", e.target.value)}
                               className="border border-indigo-200 rounded p-1 w-full bg-yellow-50 focus:outline-none focus:ring focus:ring-indigo-200"
                             />
@@ -203,13 +232,13 @@ const ItemPage = () => {
                               >
                                 <FaEdit size={18} />
                               </button>
-                              {/* <button
+                              <button
                                 onClick={() => handleDelete(id)}
                                 className="text-red-600 hover:text-red-800 transition-transform hover:scale-110"
                                 title="Delete"
                               >
                                 <FaTimes size={18} />
-                              </button> */}
+                              </button>
                             </div>
                           )}
                         </td>

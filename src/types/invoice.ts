@@ -6,15 +6,18 @@ export interface InvoiceItemCreate {
 
 export interface InvoiceCreate {
   party_id: string;
-  invoice_date: string; // ISO date string
-  items: InvoiceItemCreate[];
+  shop_id: string;
+  invoice_date: string;
+  items: InvoiceItem[];
 }
 
 export interface InvoiceResponse {
   id: string;
-  invoice_number: string;
+  invoice_number: number;
+  party_id: string;
+  shop_id: string;
   total_amount: number;
-  tax_amount?: number;
-  net_amount?: number;
+  net_amount: number;
   status: string;
+  items: InvoiceItem[];
 }
