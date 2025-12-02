@@ -22,6 +22,7 @@ import {
 
 const defaultInvoice: InvoiceCreate = {
   party_id: "",
+  shop_id: "",
   invoice_date: new Date().toISOString(),
   items: [{ item_id: "", quantity: 1, discount: 0 }],
 };
@@ -278,7 +279,7 @@ const InvoiceDashboard = () => {
                   <td className="p-3">
                     <button
                       onClick={() =>
-                        downloadInvoicePdf(inv.id, inv.invoice_number)
+                        downloadInvoicePdf(inv.id, String(inv.invoice_number));
                       }
                       title="Save Invoice PDF"
                       className="text-red-600 hover:text-red-800 transition"
