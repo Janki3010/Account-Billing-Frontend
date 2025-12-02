@@ -1,6 +1,6 @@
 import api from "./axios";
 
-import type { ItemRequest, UpdateRequest, ItemResponse } from "../types/item";
+import type { ItemRequest, ItemResponse } from "../types/item";
 
 export const createItem = async (data: ItemRequest): Promise<ItemResponse> => {
   const response = await api.post("item/create", data);

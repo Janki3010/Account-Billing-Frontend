@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createItem, getAllItems, updateItem, deleteItem } from "../../api/item";
 import { getCompanies } from "../../api/company";
 import type { ItemRequest, ItemResponse } from "../../types/item";
-import type { Company } from "../../api/company";
+import type { Company } from "../../types/company";
 import { FaEdit, FaSave, FaTimes, FaPlus, FaBoxOpen } from "react-icons/fa";
 
 const ItemPage = () => {

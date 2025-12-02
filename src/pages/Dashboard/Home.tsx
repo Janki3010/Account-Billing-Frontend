@@ -4,7 +4,7 @@ import {
   FaBuilding, FaFileInvoice, FaUsers, FaMoneyBillWave,
   FaBoxOpen, FaStore, FaChartLine,
 } from "react-icons/fa";
-import { getDashboardReport } from "../../api/report";
+import { getDashboardData } from "../../api/report";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
@@ -26,7 +26,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const data = await getDashboardReport();
+        const data = await getDashboardData();
         setReport(data);
       } catch (error) {
         console.error("Error fetching dashboard report:", error);
