@@ -1,14 +1,15 @@
 // frontend/types/item.ts
 export interface ItemRequest {
-  name?: string;
-  description?: string;
-  hsn_code?: string;
-  unit?: string;
-  purchase_price?: number;
-  sale_price?: number;
-  stock_quantity?: number;
-  gst_rate?: number;
-  company_id?: string;
+  name: string;
+  description: string;
+  hsn_code: string;
+  IMEI_number?: string;
+  unit: string;
+  purchase_price: number;
+  sale_price: number;
+  stock_quantity: number;
+  gst_rate: number;
+  company_id: string;
 }
 
 
@@ -27,4 +28,6 @@ export interface ItemResponse {
   stock_quantity: number;
   gst_rate: number;
   company_id: string;
+  item_id?: string;
+  company_name?: string;
 }

@@ -16,10 +16,10 @@ const ItemPage = () => {
     hsn_code: "",
     IMEI_number: "",
     unit: "",
-    purchase_price: "",
-    sale_price: "",
-    stock_quantity: "",
-    gst_rate: "",
+    purchase_price: 0,
+    sale_price: 0,
+    stock_quantity: 0,
+    gst_rate: 0,
     company_id: "",
   });
 
