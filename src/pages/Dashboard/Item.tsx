@@ -48,16 +48,15 @@ const ItemPage = () => {
   };
 
   const handleFieldChange = (id: string, field: keyof ItemRequest, value: string) => {
-    setEditingItem((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        [field]: ["purchase_price", "sale_price", "stock_quantity", "gst_rate"].includes(field)
-          ? Number(value)
-          : value,
-      },
-    }));
-  };
+      setEditingItem((prev) => ({
+        ...prev,
+        [id]: {
+          ...prev[id],
+          [field]: value,
+        },
+      }));
+    };
+
 
   const handleSave = async (id: string) => {
     const updatedData = editingItem[id];
@@ -88,14 +87,12 @@ const ItemPage = () => {
     loadData();
   };
 
-  const handleInputChange = (e) => {
-  const { name, value } = e.target;
-  setFormData((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
- };
-
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    };
 
   const handleCreateItem = async () => {
       const payload = {
@@ -125,7 +122,6 @@ const ItemPage = () => {
       loadData();
     };
 
-
   const groupedItems = items.reduce((acc: Record<string, ItemResponse[]>, item) => {
     const company = item.company_name || "Unassigned";
     if (!acc[company]) acc[company] = [];
@@ -140,6 +136,7 @@ const ItemPage = () => {
         <h2 className="text-4xl font-bold text-gray-800 flex items-center gap-3 drop-shadow-md">
           <FaBoxOpen className="text-indigo-600" /> Item Management
         </h2>
+
         <button
           onClick={() => setShowCreateModal(true)}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg shadow-lg transition transform hover:scale-105"
@@ -148,7 +145,7 @@ const ItemPage = () => {
         </button>
       </div>
 
-      {/* Company-wise Grouped Tables */}
+      {/* Grouped tables by company */}
       {Object.keys(groupedItems).length === 0 ? (
         <div className="p-6 bg-white rounded-xl shadow text-center text-gray-600">
           No items found.
@@ -156,16 +153,14 @@ const ItemPage = () => {
       ) : (
         Object.entries(groupedItems).map(([company, companyItems]) => (
           <div key={company} className="mb-10">
-            {/* Company Header */}
             <h3 className="text-2xl font-semibold mb-3 text-indigo-700 border-b-2 border-indigo-300 pb-1">
               {company}
             </h3>
 
-            {/* Company Table */}
-            <div className="bg-white/80 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-indigo-100">
+            <div className="bg-white rounded-xl shadow overflow-hidden">
               <table className="min-w-full border-collapse">
                 <thead>
-                  <tr className="bg-gradient-to-r from-indigo-100 to-blue-100 text-gray-700">
+                  <tr className="bg-indigo-100 text-gray-700">
                     <th className="p-3 text-left">Name</th>
                     <th className="p-3 text-left">Price</th>
                     <th className="p-3 text-left">HSN Code</th>
@@ -174,81 +169,67 @@ const ItemPage = () => {
                     <th className="p-3 text-center">Actions</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {companyItems.map((item) => {
                     const id = item.id ?? item.item_id ?? "";
-                    if (!id) return null;
-
                     const isEditing = !!editingItem[id];
-                    const currentData = editingItem[id] || item;
+                    const current = editingItem[id] || item;
 
                     return (
-                      <tr
-                        key={id}
-                        className="border-t hover:bg-indigo-50 transition-colors duration-150"
-                      >
+                      <tr key={id} className="border-t hover:bg-indigo-50">
                         <td className="p-3">
                           {isEditing ? (
                             <input
-                              value={currentData.name || ""}
+                              value={current.name}
                               onChange={(e) => handleFieldChange(id, "name", e.target.value)}
-                              className="border border-indigo-200 rounded p-1 w-full bg-yellow-50 focus:outline-none focus:ring focus:ring-indigo-200"
+                              className="border rounded p-1 w-full bg-yellow-50"
                             />
                           ) : (
-                            <span className="font-medium text-gray-800">{item.name}</span>
+                            item.name
                           )}
                         </td>
 
                         <td className="p-3">
                           {isEditing ? (
                             <input
-                              value={currentData.sale_price ?? 0}
-                              onChange={(e) => handleFieldChange(id, "sale_price", e.target.value)}
-                              className="border border-indigo-200 rounded p-1 w-full bg-yellow-50 focus:outline-none focus:ring focus:ring-indigo-200"
+                              value={current.sale_price}
+                              onChange={(e) =>
+                                handleFieldChange(id, "sale_price", e.target.value)
+                              }
+                              className="border rounded p-1 w-full bg-yellow-50"
                             />
                           ) : (
-                            <span className="text-gray-700">{item.sale_price}</span>
+                            item.sale_price
                           )}
                         </td>
 
                         <td className="p-3">{item.hsn_code}</td>
                         <td className="p-3">{item.stock_quantity}</td>
-                        <td className="p-3 text-gray-700">{item.description}</td>
+                        <td className="p-3">{item.description}</td>
 
                         <td className="p-3 text-center">
                           {isEditing ? (
                             <div className="flex justify-center gap-3">
-                              <button
+                              <FaSave
+                                className="text-green-600 cursor-pointer"
                                 onClick={() => handleSave(id)}
-                                className="text-green-600 hover:text-green-800 transition-transform hover:scale-110"
-                                title="Save"
-                              >
-                                <FaSave size={18} />
-                              </button>
-                              <button
+                              />
+                              <FaTimes
+                                className="text-gray-600 cursor-pointer"
                                 onClick={() => handleCancelEdit(id)}
-                                className="text-gray-500 hover:text-gray-700 transition-transform hover:scale-110"
-                                title="Cancel"
-                              >
-                                <FaTimes size={18} />
-                              </button>
+                              />
                             </div>
                           ) : (
                             <div className="flex justify-center gap-3">
-                              <button
+                              <FaEdit
+                                className="text-blue-600 cursor-pointer"
                                 onClick={() => handleEdit(item)}
-                                className="text-blue-600 hover:text-blue-800 transition-transform hover:scale-110"
-                                title="Edit"
-                              >
-                                <FaEdit size={18} />
-                              </button>
-                              <button
+                              />
+                              <FaTimes
+                                className="text-red-600 cursor-pointer"
                                 onClick={() => handleDelete(id)}
-                                className="text-red-600 hover:text-red-800 transition-transform hover:scale-110"
-                                title="Delete"
-                              >
-                                <FaTimes size={18} />
-                              </button>
+                              />
                             </div>
                           )}
                         </td>
@@ -262,134 +243,61 @@ const ItemPage = () => {
         ))
       )}
 
-      {/* Create Item Modal */}
-        {showCreateModal && (
-          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 animate-fadeIn">
-            <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-2xl w-[600px] relative border border-indigo-200">
+      {/* CREATE MODAL */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+          <div className="bg-white rounded-2xl p-6 shadow-xl w-[600px] relative">
+            <button
+              onClick={() => setShowCreateModal(false)}
+              className="absolute top-3 right-3 text-gray-600"
+            >
+              <FaTimes size={20} />
+            </button>
 
-              {/* Close Button */}
+            <h2 className="text-2xl font-semibold mb-4">
+              <FaBoxOpen className="text-indigo-600 inline-block" /> Create New Item
+            </h2>
+
+            <div className="grid grid-cols-2 gap-3">
+              <input name="name" placeholder="Name" value={formData.name} onChange={handleInputChange} className="border rounded p-2" />
+
+              <input name="description" placeholder="Description" value={formData.description} onChange={handleInputChange} className="border rounded p-2" />
+
+              <input name="hsn_code" placeholder="HSN Code" value={formData.hsn_code} onChange={handleInputChange} className="border rounded p-2" />
+
+              <input name="IMEI_number" placeholder="IMEI" value={formData.IMEI_number} onChange={handleInputChange} className="border rounded p-2" />
+
+              <input name="unit" placeholder="Unit" value={formData.unit} onChange={handleInputChange} className="border rounded p-2" />
+
+              <input name="purchase_price" type="number" placeholder="Purchase Price" value={formData.purchase_price} onChange={handleInputChange} className="border rounded p-2" />
+
+              <input name="sale_price" type="number" placeholder="Sale Price" value={formData.sale_price} onChange={handleInputChange} className="border rounded p-2" />
+
+              <input name="stock_quantity" type="number" placeholder="Stock Quantity" value={formData.stock_quantity} onChange={handleInputChange} className="border rounded p-2" />
+
+              <input name="gst_rate" type="number" placeholder="GST (%)" value={formData.gst_rate} onChange={handleInputChange} className="border rounded p-2" />
+
+              <select name="company_id" value={formData.company_id} onChange={handleInputChange} className="border rounded p-2 col-span-2">
+                <option value="">Select Company</option>
+                {companies.map((company) => (
+                  <option key={company.id} value={company.id}>
+                    {company.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mt-6 text-right">
               <button
-                onClick={() => setShowCreateModal(false)}
-                className="absolute top-3 right-3 text-gray-600 hover:text-red-600"
+                onClick={handleCreateItem}
+                className="bg-indigo-600 text-white px-6 py-2 rounded-lg"
               >
-                <FaTimes size={20} />
+                Save Item
               </button>
-
-              {/* Modal Header */}
-              <h2 className="text-2xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
-                <FaBoxOpen className="text-indigo-600" /> Create New Item
-              </h2>
-
-              {/* FORM GRID */}
-              <div className="grid grid-cols-2 gap-3">
-
-                {/* TEXT INPUTS */}
-                <input
-                  name="name"
-                  placeholder="NAME"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
-                />
-
-                <input
-                  name="description"
-                  placeholder="DESCRIPTION"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
-                />
-
-                <input
-                  name="hsn_code"
-                  placeholder="HSN CODE"
-                  value={formData.hsn_code}
-                  onChange={handleInputChange}
-                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
-                />
-
-                <input
-                  name="IMEI_number"
-                  placeholder="IMEI NUMBER"
-                  value={formData.IMEI_number}
-                  onChange={handleInputChange}
-                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
-                />
-
-                <input
-                  name="unit"
-                  placeholder="UNIT"
-                  value={formData.unit}
-                  onChange={handleInputChange}
-                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
-                />
-
-                {/* NUMERIC INPUTS (stored as strings until save) */}
-                <input
-                  name="purchase_price"
-                  type="number"
-                  placeholder="PURCHASE PRICE"
-                  value={formData.purchase_price}
-                  onChange={handleInputChange}
-                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
-                />
-
-                <input
-                  name="sale_price"
-                  type="number"
-                  placeholder="SALE PRICE"
-                  value={formData.sale_price}
-                  onChange={handleInputChange}
-                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
-                />
-
-                <input
-                  name="stock_quantity"
-                  type="number"
-                  placeholder="STOCK QUANTITY"
-                  value={formData.stock_quantity}
-                  onChange={handleInputChange}
-                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
-                />
-
-                <input
-                  name="gst_rate"
-                  type="number"
-                  placeholder="GST RATE (%)"
-                  value={formData.gst_rate}
-                  onChange={handleInputChange}
-                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
-                />
-
-                {/* COMPANY DROPDOWN */}
-                <select
-                  name="company_id"
-                  value={formData.company_id}
-                  onChange={handleInputChange}
-                  className="border border-indigo-200 rounded-lg p-2 bg-white focus:ring focus:ring-indigo-200 col-span-2"
-                >
-                  <option value="">Select Company</option>
-                  {companies.map((company) => (
-                    <option key={company.id} value={company.id}>
-                      {company.name}
-                    </option>
-                  ))}
-                </select>
-
-              </div>
-
-              {/* SAVE BUTTON */}
-              <div className="mt-6 text-right">
-                <button
-                  onClick={handleCreateItem}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg shadow-md transition transform hover:scale-105"
-                >
-                  Save Item
-                </button>
-              </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
     </div>
   );
 };

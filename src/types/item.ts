@@ -5,10 +5,10 @@ export interface ItemRequest {
   hsn_code: string;
   IMEI_number?: string;
   unit: string;
-  purchase_price: number;
-  sale_price: number;
-  stock_quantity: number;
-  gst_rate: number;
+  purchase_price: string;
+  sale_price: string;
+  stock_quantity: string;
+  gst_rate: string;
   company_id: string;
 }
 
