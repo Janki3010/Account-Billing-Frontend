@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { getDashboardData } from "../../api/report"; // your backend API call
-import { FaRupeeSign, FaUserFriends, FaBoxOpen, FaArrowUp, FaArrowDown } from "react-icons/fa";
 
 interface YearlySummary {
   year: number;

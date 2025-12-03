@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import {
   createInvoice,
   getInvoices,
-  deleteInvoice,
   downloadInvoicePdf,
 } from "../../api/invoice";
 import { getParties } from "../../api/party";
@@ -22,7 +21,6 @@ import {
   FaFileInvoice,
 } from "react-icons/fa";
 
-// ✅ FIX → added shop_id in default object (deployment error)
 const defaultInvoice: InvoiceCreate = {
   party_id: "",
   shop_id: "",
@@ -191,7 +189,7 @@ const InvoiceDashboard = () => {
                 >
                   <option value="">Select Item</option>
                   {items.map((i) => (
-                    <option key={i.id} value={i.id}>
+                    <option key={i.item_id} value={i.item_id}>
                       {i.name}
                     </option>
                   ))}
