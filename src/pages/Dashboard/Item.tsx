@@ -8,7 +8,7 @@ import { FaEdit, FaSave, FaTimes, FaPlus, FaBoxOpen } from "react-icons/fa";
 const ItemPage = () => {
   const [items, setItems] = useState<ItemResponse[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [editingItem, setEditingItem] = useState<Record<string, Partial<ItemRequest>>>({});
+  const [editingItem, setEditingItem] = useState<Record<string, Partial<ItemResponse>>>({});
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState<ItemRequest>({
     name: "",
@@ -34,10 +34,21 @@ const ItemPage = () => {
   };
 
   const handleEdit = (item: ItemResponse) => {
-    const key = item.id ?? item.item_id ?? "";
-    if (!key) return;
-    setEditingItem({ [key]: { ...item } });
-  };
+      const key = item.id ?? item.item_id ?? "";
+      if (!key) return;
+
+      setEditingItem({
+        [key]: {
+          ...item,
+          // convert numbers to strings for UI fields
+          purchase_price: String(item.purchase_price),
+          sale_price: String(item.sale_price),
+          stock_quantity: String(item.stock_quantity),
+          gst_rate: String(item.gst_rate),
+        }
+      });
+    };
+
 
   const handleCancelEdit = (id: string) => {
     setEditingItem((prev) => {
@@ -52,34 +63,36 @@ const ItemPage = () => {
         ...prev,
         [id]: {
           ...prev[id],
-          [field]: value,
+          [field]: value,   // always string for input fields
         },
       }));
     };
 
 
-  const handleSave = async (id: string) => {
-    const updatedData = editingItem[id];
-    if (!updatedData) return;
 
-    const payload: ItemRequest & { id: string } = {
-      id,
-      name: updatedData.name || "",
-      description: updatedData.description || "",
-      hsn_code: updatedData.hsn_code || "",
-      IMEI_number: updatedData.IMEI_number || "",
-      unit: updatedData.unit || "",
-      purchase_price: updatedData.purchase_price ?? 0,
-      sale_price: updatedData.sale_price ?? 0,
-      stock_quantity: updatedData.stock_quantity ?? 0,
-      gst_rate: updatedData.gst_rate ?? 0,
-      company_id: updatedData.company_id || "",
+  const handleSave = async (id: string) => {
+      const updatedData = editingItem[id];
+      if (!updatedData) return;
+
+      const payload = {
+        id,
+        name: updatedData.name || "",
+        description: updatedData.description || "",
+        hsn_code: updatedData.hsn_code || "",
+        IMEI_number: updatedData.IMEI_number || "",
+        unit: updatedData.unit || "",
+        purchase_price: Number(updatedData.purchase_price),
+        sale_price: Number(updatedData.sale_price),
+        stock_quantity: Number(updatedData.stock_quantity),
+        gst_rate: Number(updatedData.gst_rate),
+        company_id: updatedData.company_id || "",
+      };
+
+  await updateItem(payload);
+      handleCancelEdit(id);
+      loadData();
     };
 
-    await updateItem(payload);
-    handleCancelEdit(id);
-    loadData();
-  };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this item?")) return;
@@ -103,7 +116,8 @@ const ItemPage = () => {
         gst_rate: Number(formData.gst_rate || 0),
       };
 
-      await createItem(payload);
+      await createItem(payload as unknown as ItemRequest);
+
 
       setFormData({
         name: "",
