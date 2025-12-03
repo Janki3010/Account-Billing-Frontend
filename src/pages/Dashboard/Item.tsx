@@ -88,33 +88,43 @@ const ItemPage = () => {
     loadData();
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: ["purchase_price", "sale_price", "stock_quantity", "gst_rate"].includes(name)
-        ? Number(value)
-        : value,
-    }));
-  };
+  const handleInputChange = (e) => {
+  const { name, value } = e.target;
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+ };
+
 
   const handleCreateItem = async () => {
-    await createItem(formData);
-    setFormData({
-      name: "",
-      description: "",
-      hsn_code: "",
-      IMEI_number: "",
-      unit: "",
-      purchase_price: 0,
-      sale_price: 0,
-      stock_quantity: 0,
-      gst_rate: 0,
-      company_id: "",
-    });
-    setShowCreateModal(false);
-    loadData();
-  };
+      const payload = {
+        ...formData,
+        purchase_price: Number(formData.purchase_price || 0),
+        sale_price: Number(formData.sale_price || 0),
+        stock_quantity: Number(formData.stock_quantity || 0),
+        gst_rate: Number(formData.gst_rate || 0),
+      };
+
+      await createItem(payload);
+
+      setFormData({
+        name: "",
+        description: "",
+        hsn_code: "",
+        IMEI_number: "",
+        unit: "",
+        purchase_price: "",
+        sale_price: "",
+        stock_quantity: "",
+        gst_rate: "",
+        company_id: "",
+      });
+
+      setShowCreateModal(false);
+      loadData();
+    };
+
 
   const groupedItems = items.reduce((acc: Record<string, ItemResponse[]>, item) => {
     const company = item.company_name || "Unassigned";
@@ -253,60 +263,133 @@ const ItemPage = () => {
       )}
 
       {/* Create Item Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 animate-fadeIn">
-          <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-2xl w-[600px] relative border border-indigo-200">
-            <button
-              onClick={() => setShowCreateModal(false)}
-              className="absolute top-3 right-3 text-gray-600 hover:text-red-600"
-            >
-              <FaTimes size={20} />
-            </button>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
-              <FaBoxOpen className="text-indigo-600" /> Create New Item
-            </h2>
+        {showCreateModal && (
+          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 animate-fadeIn">
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-2xl w-[600px] relative border border-indigo-200">
 
-            <div className="grid grid-cols-2 gap-3">
-              {Object.entries(formData).map(([key, value]) =>
-                key === "company_id" ? (
-                  <select
-                    key={key}
-                    name={key}
-                    value={value}
-                    onChange={handleInputChange}
-                    className="border border-indigo-200 rounded-lg p-2 bg-white focus:ring focus:ring-indigo-200"
-                  >
-                    <option value="">Select Company</option>
-                    {companies.map((company) => (
-                      <option key={company.id} value={company.id}>
-                        {company.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    key={key}
-                    name={key}
-                    placeholder={key.replace("_", " ").toUpperCase()}
-                    value={value}
-                    onChange={handleInputChange}
-                    className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
-                  />
-                )
-              )}
-            </div>
-
-            <div className="mt-6 text-right">
+              {/* Close Button */}
               <button
-                onClick={handleCreateItem}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg shadow-md transition transform hover:scale-105"
+                onClick={() => setShowCreateModal(false)}
+                className="absolute top-3 right-3 text-gray-600 hover:text-red-600"
               >
-                Save Item
+                <FaTimes size={20} />
               </button>
+
+              {/* Modal Header */}
+              <h2 className="text-2xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
+                <FaBoxOpen className="text-indigo-600" /> Create New Item
+              </h2>
+
+              {/* FORM GRID */}
+              <div className="grid grid-cols-2 gap-3">
+
+                {/* TEXT INPUTS */}
+                <input
+                  name="name"
+                  placeholder="NAME"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
+                />
+
+                <input
+                  name="description"
+                  placeholder="DESCRIPTION"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
+                />
+
+                <input
+                  name="hsn_code"
+                  placeholder="HSN CODE"
+                  value={formData.hsn_code}
+                  onChange={handleInputChange}
+                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
+                />
+
+                <input
+                  name="IMEI_number"
+                  placeholder="IMEI NUMBER"
+                  value={formData.IMEI_number}
+                  onChange={handleInputChange}
+                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
+                />
+
+                <input
+                  name="unit"
+                  placeholder="UNIT"
+                  value={formData.unit}
+                  onChange={handleInputChange}
+                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
+                />
+
+                {/* NUMERIC INPUTS (stored as strings until save) */}
+                <input
+                  name="purchase_price"
+                  type="number"
+                  placeholder="PURCHASE PRICE"
+                  value={formData.purchase_price}
+                  onChange={handleInputChange}
+                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
+                />
+
+                <input
+                  name="sale_price"
+                  type="number"
+                  placeholder="SALE PRICE"
+                  value={formData.sale_price}
+                  onChange={handleInputChange}
+                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
+                />
+
+                <input
+                  name="stock_quantity"
+                  type="number"
+                  placeholder="STOCK QUANTITY"
+                  value={formData.stock_quantity}
+                  onChange={handleInputChange}
+                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
+                />
+
+                <input
+                  name="gst_rate"
+                  type="number"
+                  placeholder="GST RATE (%)"
+                  value={formData.gst_rate}
+                  onChange={handleInputChange}
+                  className="border border-indigo-200 rounded-lg p-2 focus:ring focus:ring-indigo-200"
+                />
+
+                {/* COMPANY DROPDOWN */}
+                <select
+                  name="company_id"
+                  value={formData.company_id}
+                  onChange={handleInputChange}
+                  className="border border-indigo-200 rounded-lg p-2 bg-white focus:ring focus:ring-indigo-200 col-span-2"
+                >
+                  <option value="">Select Company</option>
+                  {companies.map((company) => (
+                    <option key={company.id} value={company.id}>
+                      {company.name}
+                    </option>
+                  ))}
+                </select>
+
+              </div>
+
+              {/* SAVE BUTTON */}
+              <div className="mt-6 text-right">
+                <button
+                  onClick={handleCreateItem}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg shadow-md transition transform hover:scale-105"
+                >
+                  Save Item
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 };
