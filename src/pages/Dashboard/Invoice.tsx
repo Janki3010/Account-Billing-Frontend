@@ -8,10 +8,12 @@ import {
 import { getParties } from "../../api/party";
 import { getAllShopProfiles } from "../../api/shop_profile";
 import { getAllItems } from "../../api/item";
+
 import type { InvoiceCreate, InvoiceResponse } from "../../types/invoice";
 import type { Party } from "../../types/party";
 import type { ShopProfile } from "../../types/shop_profile";
 import type { ItemResponse } from "../../types/item";
+
 import {
   FaPlus,
   FaTimes,
@@ -20,6 +22,7 @@ import {
   FaFileInvoice,
 } from "react-icons/fa";
 
+// ✅ FIX → added shop_id in default object (deployment error)
 const defaultInvoice: InvoiceCreate = {
   party_id: "",
   shop_id: "",
@@ -96,6 +99,7 @@ const InvoiceDashboard = () => {
     try {
       await createInvoice(formData);
       alert("Invoice created successfully!");
+
       setFormData({ ...defaultInvoice });
       setShowCreateModal(false);
       fetchInvoices();
@@ -104,19 +108,9 @@ const InvoiceDashboard = () => {
     }
   };
 
-  const handleDeleteInvoice = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this invoice?")) return;
-    try {
-      await deleteInvoice(id);
-      alert("Invoice deleted successfully!");
-      fetchInvoices();
-    } catch (error) {
-      console.error("Error deleting invoice:", error);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100 p-8">
+
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-4xl font-bold text-gray-800 flex items-center gap-3 drop-shadow-md">
@@ -140,6 +134,7 @@ const InvoiceDashboard = () => {
             >
               <FaTimes size={20} />
             </button>
+
             <h2 className="text-2xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
               <FaBoxOpen className="text-indigo-600" /> Create New Invoice
             </h2>
@@ -148,7 +143,7 @@ const InvoiceDashboard = () => {
               <select
                 value={formData.party_id}
                 onChange={handlePartyChange}
-                className="border border-indigo-200 rounded-lg p-2 bg-white focus:ring focus:ring-indigo-200"
+                className="border border-indigo-200 rounded-lg p-2 bg-white"
               >
                 <option value="">Select Party</option>
                 {parties.map((party) => (
@@ -161,7 +156,7 @@ const InvoiceDashboard = () => {
               <select
                 value={formData.shop_id}
                 onChange={handleShopChange}
-                className="border border-indigo-200 rounded-lg p-2 bg-white focus:ring focus:ring-indigo-200"
+                className="border border-indigo-200 rounded-lg p-2 bg-white"
               >
                 <option value="">Select Shop</option>
                 {shopProfiles.map((shop) => (
@@ -173,7 +168,6 @@ const InvoiceDashboard = () => {
 
               <input
                 type="date"
-                name="invoice_date"
                 value={formData.invoice_date.split("T")[0]}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -181,18 +175,19 @@ const InvoiceDashboard = () => {
                     invoice_date: new Date(e.target.value).toISOString(),
                   }))
                 }
-                className="border border-indigo-200 rounded-lg p-2 bg-white focus:ring focus:ring-indigo-200"
+                className="border border-indigo-200 rounded-lg p-2 bg-white"
               />
             </div>
 
-            {/* Invoice Items */}
+            {/* Items */}
             <h3 className="text-lg font-semibold mt-4">Items</h3>
+
             {formData.items.map((item, idx) => (
               <div key={idx} className="grid grid-cols-4 gap-2 my-2">
                 <select
                   value={item.item_id}
                   onChange={(e) => handleItemChange(idx, "item_id", e.target.value)}
-                  className="border border-indigo-200 rounded-lg p-2 bg-white focus:ring focus:ring-indigo-200"
+                  className="border border-indigo-200 rounded-lg p-2 bg-white"
                 >
                   <option value="">Select Item</option>
                   {items.map((i) => (
@@ -204,22 +199,20 @@ const InvoiceDashboard = () => {
 
                 <input
                   type="number"
-                  placeholder="Quantity"
                   value={item.quantity}
                   onChange={(e) =>
                     handleItemChange(idx, "quantity", Number(e.target.value))
                   }
-                  className="border border-indigo-200 rounded-lg p-2 bg-white focus:ring focus:ring-indigo-200"
+                  className="border border-indigo-200 rounded-lg p-2 bg-white"
                 />
 
                 <input
                   type="number"
-                  placeholder="Discount"
                   value={item.discount}
                   onChange={(e) =>
                     handleItemChange(idx, "discount", Number(e.target.value))
                   }
-                  className="border border-indigo-200 rounded-lg p-2 bg-white focus:ring focus:ring-indigo-200"
+                  className="border border-indigo-200 rounded-lg p-2 bg-white"
                 />
               </div>
             ))}
@@ -231,14 +224,14 @@ const InvoiceDashboard = () => {
                   items: [...prev.items, { item_id: "", quantity: 1, discount: 0 }],
                 }))
               }
-              className="mt-2 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded transition"
+              className="mt-2 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded"
             >
               Add Item
             </button>
 
             <button
               onClick={handleAddInvoice}
-              className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg shadow-md transition transform hover:scale-105 flex items-center gap-2"
+              className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg shadow-md flex items-center gap-2"
             >
               <FaPlus /> Save Invoice
             </button>
@@ -248,7 +241,7 @@ const InvoiceDashboard = () => {
 
       {/* Invoices Table */}
       <div className="bg-white/80 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-indigo-100 mt-6">
-        <table className="min-w-full border-collapse">
+        <table className="min-w-full">
           <thead>
             <tr className="bg-gradient-to-r from-indigo-100 to-blue-100 text-gray-700">
               <th className="p-3 text-left">Invoice #</th>
@@ -261,37 +254,36 @@ const InvoiceDashboard = () => {
               <th className="p-3 text-left">Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {invoices.map((inv) => {
               const party = parties.find((p) => p.id === inv.party_id);
+
               return (
-                <tr
-                  key={inv.id}
-                  className="hover:bg-indigo-50 transition-colors"
-                >
+                <tr key={inv.id} className="hover:bg-indigo-50">
                   <td className="p-3">{inv.invoice_number}</td>
-                  <td className="p-3">{party?.name ?? inv.party_id}</td>
-                  <td className="p-3">{party?.address ?? "-"}</td>
-                  <td className="p-3">{party?.phone ?? "-"}</td>
+                  <td className="p-3">{party?.name || "-"}</td>
+                  <td className="p-3">{party?.address || "-"}</td>
+                  <td className="p-3">{party?.phone || "-"}</td>
                   <td className="p-3">{inv.total_amount}</td>
-                  <td className="p-3">{inv.net_amount ?? "-"}</td>
+                  <td className="p-3">{inv.net_amount}</td>
                   <td className="p-3">{inv.status}</td>
+
                   <td className="p-3">
                     <button
                       onClick={() =>
-                        downloadInvoicePdf(inv.id, String(inv.invoice_number));
+                        downloadInvoicePdf(String(inv.id), String(inv.invoice_number))
                       }
-                      title="Save Invoice PDF"
-                      className="text-red-600 hover:text-red-800 transition"
+                      className="text-red-600 hover:text-red-800"
                     >
                       <FaFilePdf size={20} />
                     </button>
-
                   </td>
                 </tr>
               );
             })}
           </tbody>
+
         </table>
       </div>
     </div>
